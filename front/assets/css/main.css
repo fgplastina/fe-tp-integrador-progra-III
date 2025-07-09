@@ -1858,3 +1858,18 @@ input, select, textarea {
 			}
 
 		}
+
+/* Selector de categorías */
+
+.category-select-wrapper {
+  margin-bottom: 2rem;
+  padding: 0 1rem;
+}
+
+.category-select {
+  padding: 0.5rem;
+  font-size: 1rem;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+  background-color: #fff;
+}
