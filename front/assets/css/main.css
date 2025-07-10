@@ -94,7 +94,7 @@ input, select, textarea {
 	}
 
 	body {
-		background: #b6b9db;
+		background: #cccccf;
 	}
 
 		body.is-preload *, body.is-preload *:before, body.is-preload *:after {
@@ -985,15 +985,11 @@ input, select, textarea {
 		-ms-transition: background-color 0.2s ease-in-out, color 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
 		transition: background-color 0.2s ease-in-out, color 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
 		background-color: transparent;
-		border-radius: 4px;
-		border: 0;
-		box-shadow: inset 0 0 0 2px #585858;
-		color: #585858 !important;
+		color: black !important;
 		cursor: pointer;
 		display: inline-block;
 		font-size: 0.8em;
 		font-weight: 900;
-		height: 3.5em;
 		letter-spacing: 0.35em;
 		line-height: 3.45em;
 		overflow: hidden;
@@ -1026,8 +1022,8 @@ input, select, textarea {
 		input[type="button"]:hover,
 		button:hover,
 		.button:hover {
-			color: #f2849e !important;
-			box-shadow: inset 0 0 0 2px #f2849e;
+			color: #2f42ee !important;
+			box-shadow: inset 0 0 0 2px #2f42ee;
 		}
 
 		input[type="submit"]:active,
@@ -1035,7 +1031,7 @@ input, select, textarea {
 		input[type="button"]:active,
 		button:active,
 		.button:active {
-			background-color: rgba(242, 132, 158, 0.1);
+			background-color: transparent;
 		}
 
 		input[type="submit"].small,
@@ -1060,7 +1056,7 @@ input, select, textarea {
 		button.primary,
 		.button.primary {
 			box-shadow: none;
-			background-color: #585858;
+			background-color: transparent;
 			color: #ffffff !important;
 		}
 
@@ -1069,7 +1065,7 @@ input, select, textarea {
 			input[type="button"].primary:hover,
 			button.primary:hover,
 			.button.primary:hover {
-				background-color: #f2849e;
+				background-color: #65a2f1;
 			}
 
 			input[type="submit"].primary:active,
@@ -1077,7 +1073,7 @@ input, select, textarea {
 			input[type="button"].primary:active,
 			button.primary:active,
 			.button.primary:active {
-				background-color: #ee5f81;
+				background-color: #65a2f1;
 			}
 
 		input[type="submit"].disabled, input[type="submit"]:disabled,
@@ -1520,7 +1516,7 @@ input, select, textarea {
 		max-width: 80%;
 		height: 100%;
 		-webkit-overflow-scrolling: touch;
-		background: #585858;
+		background: #7b88ff;
 		color: #ffffff;
 		cursor: default;
 		visibility: hidden;
@@ -1870,6 +1866,13 @@ input, select, textarea {
 		padding: 0.5rem;
 		font-size: 1rem;
 		border-radius: 6px;
-		border: 1px solid #ccc;
+		border: 1px solid transparent;
 		background-color: #fff;
+	}
+
+	.filter-bar{
+		display: flex;
+		justify-content: center;
+		gap: 6em;
+		border-bottom: 0.1em solid #333333 !important;
 	}
