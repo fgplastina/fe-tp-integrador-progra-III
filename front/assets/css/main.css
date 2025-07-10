@@ -310,6 +310,7 @@ input, select, textarea {
 	.shop-title {
 		padding: 0.3em;
 		text-align: center;
+		color: rgb(24, 24, 24);
 	}
 
 /* Section/Article */
@@ -1862,7 +1863,7 @@ input, select, textarea {
 	}
 
 	.category-select {
-		text-align: center;
+		align-content: center;
 		padding: 0.5rem;
 		font-size: 1rem;
 		border-radius: 6px;
