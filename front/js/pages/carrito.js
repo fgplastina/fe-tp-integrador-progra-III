@@ -1,11 +1,11 @@
 import { postData } from '../utils.js';
 
 document.addEventListener('DOMContentLoaded', () => {
-  console.log('carrito.js cargado');
 
   let cart = JSON.parse(localStorage.getItem('cart')) || [];
   const cartContainer = document.getElementById('items-carrito');
   const totalPriceEl = document.getElementById('precio-total');
+  const nroContadorCarrito = document.getElementById('nro-contador-carrito');
 
   function renderCart() {
     cartContainer.innerHTML = '';
@@ -15,7 +15,7 @@ document.addEventListener('DOMContentLoaded', () => {
       return;
     }
 
-    // Agrupaamos los productos por ID y contamos las cantidades porque no tenemos "quantity" en los items
+    // Agrupamos los productos por ID y contamos las cantidades porque no tenemos "quantity" en los items
     const grouped = cart.reduce((acc, product) => {
       if (!acc[product.id]) {
         acc[product.id] = { ...product, quantity: 0 };
@@ -31,9 +31,11 @@ document.addEventListener('DOMContentLoaded', () => {
       cartContainer.appendChild(item);
     });
 
-    // Claculamos el total
+    // Calculamos el total
     const total = Object.values(grouped).reduce((sum, p) => sum + p.price * p.quantity, 0);
     totalPriceEl.textContent = `$${total.toFixed(2)}`;
+
+    nroContadorCarrito.textContent = `${cart.length}`
   }
 
   function clearCart() {
