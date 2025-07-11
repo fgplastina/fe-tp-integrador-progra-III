@@ -1,52 +1,35 @@
 import { fetchData, createElement } from '../utils.js';
 
 const mainSection = document.querySelector('#main .tiles');
-
-let cart = loadCart();
+let allProducts = [];
+let cart = JSON.parse(localStorage.getItem('cart')) || [];
 
 async function init() {
-  const products = await fetchData('/products');
-  const categories = await fetchData('/categories');
-  renderFilters(categories, products);
-  renderProducts(products);
-  renderCarrito();
-  asignarEventosCarrito();
+  try {
+    const products = await fetchData('/products');
+    const categories = await fetchData('/categories');
+    allProducts = products;
+    renderFilters(categories);
+    renderProducts(products);
+  } catch (err) {
+    console.error('Error cargando datos:', err);
+  }
 }
 
-
-function loadCart() {
-  const data = localStorage.getItem('cart');
-  return data ? JSON.parse(data) : [];
-}
-
-function saveCart() {
-  localStorage.setItem('cart', JSON.stringify(cart));
-}
-
-function addToCart(id, name, price) {
-  const cart = JSON.parse(localStorage.getItem('cart')) || [];
-  cart.push({ id, name, price });
-  localStorage.setItem('cart', JSON.stringify(cart));
-  alert(`${name} agregado al carrito`);
-}
-
-function updateCartCounter() {
-  const counter = document.getElementById('cart-counter');
-  if (counter) counter.textContent = `🛒 ${cart.length}`;
-}
-
-function renderFilters(categories, products) {
+function renderFilters(categories) {
   const wrapper = document.createElement('div');
   wrapper.classList.add('category-select-wrapper');
 
   const select = document.createElement('select');
   select.classList.add('category-select');
 
+  // "Todos"
   const allOption = document.createElement('option');
   allOption.value = 'all';
   allOption.textContent = 'Todos';
   select.appendChild(allOption);
 
+  // Resto de las categorías
   categories.forEach(cat => {
     const option = document.createElement('option');
     option.value = cat.id;
@@ -54,31 +37,27 @@ function renderFilters(categories, products) {
     select.appendChild(option);
   });
 
-  select.onchange = () => {
+  // Evento de cambio
+  select.addEventListener('change', () => {
     const selected = select.value;
     if (selected === 'all') {
-      renderProducts(products);
+      renderProducts(allProducts);
     } else {
-      const filtered = products.filter(p => p.category_id === parseInt(selected));
+      const filtered = allProducts.filter(p => p.category_id === parseInt(selected));
       renderProducts(filtered);
     }
-    asignarEventosCarrito();
-  };
+  });
 
   wrapper.appendChild(select);
   mainSection.before(wrapper);
 }
 
-function renderProducts(productList) {
+function renderProducts(products) {
   mainSection.innerHTML = '';
 
-  productList.forEach(p => {
+  products.forEach(p => {
     const article = document.createElement('article');
     article.className = 'style1';
-
-    article.dataset.id = p.id;
-    article.dataset.name = p.name;
-    article.dataset.price = p.price;
 
     article.innerHTML = `
       <span class="image"><img src="${p.image_url}" alt="${p.name}" /></span>
@@ -86,7 +65,7 @@ function renderProducts(productList) {
         <h2>${p.name}</h2>
         <div class="content">
           <p>$${p.price.toFixed(2)}</p>
-          <div class="botones-carrito" data-id=${p.id} data-nombre=${p.nombre} data-precio=${p.precio} data-imagen=${p.image_url}>
+          <div class="botones-carrito" data-id="${p.id}" data-nombre="${p.name}" data-precio="${p.price}" data-imagen="${p.image_url}">
             <button class="boton-restar">-</button>
             <button class="boton-sumar">+</button>
           </div>
@@ -94,95 +73,35 @@ function renderProducts(productList) {
       </a>
     `;
 
-    article.addEventListener('click', () => {
-      const id = parseInt(article.dataset.id);
-      const name = article.dataset.name;
-      const price = parseFloat(article.dataset.price);
-      addToCart(id, name, price);
-    });
-
     mainSection.appendChild(article);
   });
+
+  asignarEventosCarrito();
 }
 
-function renderCarrito() {
-  let carrito = [];
-  const contenedorCarrito = document.getElementById("items-carrito");
+function addToCart(id, name, price) {
+  cart.push({ id, name, price });
+  localStorage.setItem('cart', JSON.stringify(cart));
+  alert(`${name} agregado al carrito`);
+  updateCartCounter();
+}
 
-  function actualizarCarrito() {
-      contenedorCarrito.innerHTML = '';
-      carrito.forEach(producto => {
-          const item = document.createElement('li');
-          item.className = 'bloque-item';
-          item.innerHTML = `
-          <p class="nombre-item">${producto.nombre} - ${producto.precio}</p>
-          <button id=${producto.id} class="boton-eliminar">Eliminar</button>
-          `;
-          contenedorCarrito.appendChild(item);
-
-          const conteo = document.createElement('div');
-          conteo.className = 'botonesContadorCarrito';
-          conteo.innerHTML = `
-          <div class="botonesContadorCarrito">
-              <button onclick="restarCantidadCarrito(${producto.id})">-</button>
-              <span id="${producto.id}">1</span>
-              <button onclick="sumarCantidadCarrito(${producto.id})">+</button>
-          </div>
-          `;
-
-          item.appendChild(conteo);
-      });
+function updateCartCounter() {
+  const counter = document.getElementById('cart-counter');
+  if (counter) {
+    counter.textContent = `🛒 ${cart.length}`;
   }
+}
 
-  function eliminarProducto(idFruta) {
-      carrito = carrito.filter((fruta) => fruta.id !== Number(idFruta));
-      mostrarCarrito();
-  }
-
-
-  function almacenarCarritoLocalStorage() {
-      const jsonFrutas = JSON.stringify(arrayFrutas);
-      localStorage.setItem("frutas", jsonFrutas);
-
-  }
-
-  function recuperarCarritoLocalStorage() {
-      const datosFrutasCarrito = localStorage.getItem("frutas");
-
-      if (datosFrutasCarrito) {
-          carrito = JSON.parse(datosFrutasCarrito);
-          console.log("Se cargaron datos guardados del carrito.");
-      } else {
-      console.log("No se encontraron datos guardados del carrito");
-      }
-
-  }
-
-
-  function actualizarContadorCarrito() {
-      const contadorCarrito = document.getElementById("contador-carrito");
-      contenedorCarrito.textContent = carrito.length;
-  }
-
-  function sumarAlCarrito() {
-      if (!carrito[id]) {
-      carrito[id] = { nombre, precio, cantidad: 0 };
-      }
-      carrito[id].cantidad++;
-      cantidadSpan.textContent = carrito[id].cantidad;
-      actualizarCarrito();
-  }
-
-
-  function restarCantidadCarrito(id) {
-      const contadorCarrito = document.getElementById(id)
-      parseInt(contadorCarrito.textContent)--;
-  }
-
-  function actualizarPrecioCarrito() {
-      const precioTotalCarrito = document.getElementById('precio-total');
-      const precioTotal = carrito.reduce((a, c) => a + c, 0)
-      precioTotalCarrito.textContent = carrito.length;
+function removeFromCart(id) {
+  const index = cart.findIndex(item => item.id === id);
+  if (index !== -1) {
+    cart.splice(index, 1);
+    localStorage.setItem('cart', JSON.stringify(cart));
+    alert(`Producto removido del carrito`);
+    updateCartCounter();
+  } else {
+    alert('Este producto no está en el carrito');
   }
 }
 
@@ -194,16 +113,19 @@ function asignarEventosCarrito() {
     const nombre = producto.dataset.nombre;
     const precio = parseFloat(producto.dataset.precio);
 
-    producto.querySelector('.boton-sumar').addEventListener('click', (event) => {
+    const sumarBtn = producto.querySelector('.boton-sumar');
+    const restarBtn = producto.querySelector('.boton-restar');
+
+    sumarBtn.addEventListener('click', (event) => {
       event.preventDefault();
       event.stopPropagation();
-      console.log('click en boton +');
+      addToCart(id, nombre, precio);
     });
 
-    producto.querySelector('.boton-restar').addEventListener('click', (event) => {
+    restarBtn.addEventListener('click', (event) => {
       event.preventDefault();
       event.stopPropagation();
-      console.log('click en boton -');
+      removeFromCart(id);
     });
   });
 }
