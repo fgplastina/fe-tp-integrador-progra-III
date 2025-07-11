@@ -1,31 +1,89 @@
-const carritoContainer = document.getElementById('items-carrito');
-const totalSpan = document.getElementById('precio-total');
+import { postData } from '../utils.js';
 
-function renderCarrito() {
-  const cart = JSON.parse(localStorage.getItem('cart')) || [];
+document.addEventListener('DOMContentLoaded', () => {
+  console.log('carrito.js cargado');
 
-  carritoContainer.innerHTML = '';
+  let cart = JSON.parse(localStorage.getItem('cart')) || [];
+  const cartContainer = document.getElementById('items-carrito');
+  const totalPriceEl = document.getElementById('precio-total');
 
-  if (cart.length === 0) {
-    carritoContainer.innerHTML = '<p>No hay elementos en el carrito.</p>';
-    totalSpan.textContent = '$0.00';
-    return;
+  function renderCart() {
+    cartContainer.innerHTML = '';
+    if (cart.length === 0) {
+      cartContainer.innerHTML = '<p>No hay elementos en el carrito.</p>';
+      totalPriceEl.textContent = '$0.00';
+      return;
+    }
+
+    // Agrupaamos los productos por ID y contamos las cantidades porque no tenemos "quantity" en los items
+    const grouped = cart.reduce((acc, product) => {
+      if (!acc[product.id]) {
+        acc[product.id] = { ...product, quantity: 0 };
+      }
+      acc[product.id].quantity++;
+      return acc;
+    }, {});
+
+    Object.values(grouped).forEach((product) => {
+      const item = document.createElement('li');
+      item.className = 'bloque-item';
+      item.textContent = `${product.name} - $${product.price.toFixed(2)} x ${product.quantity}`;
+      cartContainer.appendChild(item);
+    });
+
+    // Claculamos el total
+    const total = Object.values(grouped).reduce((sum, p) => sum + p.price * p.quantity, 0);
+    totalPriceEl.textContent = `$${total.toFixed(2)}`;
   }
 
-  let total = 0;
+  function clearCart() {
+    cart = [];
+    localStorage.removeItem('cart');
+    renderCart();
+    console.log('Carrito vacío');
+  }
 
-  cart.forEach(product => {
-    const item = document.createElement('div');
-    item.classList.add('carrito-item');
-    item.innerHTML = `
-      <p><strong>${product.name}</strong> - $${product.price.toFixed(2)}</p>
-    `;
-    carritoContainer.appendChild(item);
+  async function confirmCart() {
+    if (cart.length === 0) {
+      alert('El carrito está vacío');
+      return;
+    }
 
-    total += product.price;
-  });
+    const grouped = cart.reduce((acc, product) => {
+      if (!acc[product.id]) {
+        acc[product.id] = { ...product, quantity: 0 };
+      }
+      acc[product.id].quantity++;
+      return acc;
+    }, {});
 
-  totalSpan.textContent = `$${total.toFixed(2)}`;
-}
+    const items = Object.values(grouped).map(({ id, name, price, quantity }) => ({
+      product_id: id,
+      name,
+      unit_price: price,
+      quantity,
+    }));
 
-renderCarrito();
+    const total = items.reduce((sum, p) => sum + p.unit_price * p.quantity, 0);
+
+    try {
+      const data = await postData('/sales', {
+        items,
+        total,
+      });
+      console.log('Compra confirmada:', data);
+      console.log('Ticket generado:\n');
+      console.table(cart);
+      alert('Gracias por tu compra!');
+      clearCart();
+    } catch (error) {
+      console.error(error);
+      alert('Hubo un error al confirmar la compra');
+    }
+  }
+
+  renderCart();
+
+  document.getElementById('btn-cancel')?.addEventListener('click', clearCart);
+  document.getElementById('btn-confirm')?.addEventListener('click', confirmCart);
+});
